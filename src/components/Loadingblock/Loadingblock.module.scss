@@ -1,0 +1,33 @@
+.root {
+	display: block;
+	background: #ccc;
+	height: 1em;
+	width: 90%;
+	position: relative;
+	overflow: hidden;
+	opacity: 0.5;
+	&:after {
+	  content: '';
+	  position: absolute;
+	  width: 6em;
+	  height: 100%;
+	  top: 0;
+	  left: -1em;
+	  background: rgba(white, 0.2);
+	  transform: skewX(-20deg);
+	  box-shadow: 0 0 5em 2em rgba(white, 0.2);
+	  animation: loadingRipple .8s linear;
+	  animation-fill-mode: both;
+	  animation-play-state: running;
+	  animation-iteration-count: infinite;
+	}
+  }
+
+@keyframes loadingRipple {
+	from {
+	  left: -1em;
+	}
+	to {
+	  left: 100%;
+	}
+  }

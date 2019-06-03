@@ -1,0 +1,75 @@
+@import '../../styles/variables';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.container {
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.message {
+  border: 0.1rem solid $grey;
+  padding: 1rem;
+  border-radius: .85rem;
+  width: auto;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  margin-right: auto;
+  h1,h2,h3,h4,h5,h6 {
+    font-size: 1.4rem;
+  }
+  p {
+    font-size: 1.2rem;
+  }
+  *:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.fromUser {
+  background: $primaryColor;
+  color: #fff;
+  margin-right: 0;
+  margin-left: auto;
+  text-align: right;
+}
+
+.typing {
+  width: auto;
+  margin: 1.5rem auto 1rem 0.8rem;
+}
+
+.typingDot {
+  display:inline-block;
+  width:0.7rem;
+  height:0.7rem;
+  border-radius:50%;
+  margin-right:0.6rem;
+  background: rgba($primaryColor, 0.5);
+  animation: wave 1s linear infinite;
+
+  &:nth-child(2) {
+    animation-delay: -0.9s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: -0.6s;
+  }
+}
+
+@keyframes wave {
+	0%, 60%, 100% {
+		transform: initial;
+	}
+
+	30% {
+		transform: translateY(-0.7rem);
+	}
+}

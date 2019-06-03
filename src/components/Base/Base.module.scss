@@ -1,0 +1,12 @@
+.root {
+  background: #fff;
+  height: calc(100vh - 2rem);
+  border-radius: 2.5rem;
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.15);
+  width: calc(100% - 2rem);
+  margin: 1rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

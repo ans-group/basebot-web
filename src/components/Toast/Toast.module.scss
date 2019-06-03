@@ -1,0 +1,107 @@
+@import '../../styles/variables';
+
+.root {
+  position: fixed;
+  width: 23rem;
+  max-width: 98%;
+  text-align: center;
+  z-index: $zIndexSuper;
+}
+
+.toastRoot {
+  text-align: left;
+  border-radius: 0.3rem;
+  transition: all .2s cubic-bezier(0.42, 0, 0.57, 1.43);
+  display: block;
+  max-width: 100%;
+  background: rgba(40,40,40,0.95);
+  box-shadow: 0 0.2rem 1.5rem 0.2rem rgba($grey, 0.6);
+  margin: 0 auto 1.5rem;
+  padding: 1rem 1.2rem;
+}
+
+.success {
+  border-left: 0.5rem solid green;
+}
+
+.warning {
+  border-left: 0.5rem solid orange;
+}
+
+.error {
+  border-left: 0.5rem solid red;
+}
+
+.title {
+  margin: 0;
+  font-weight: 500;
+  color: #fff;
+}
+
+.text {
+  font-size: 1rem;
+  margin: 0;
+  margin-top: 0.3rem;
+  line-height: 1.4;
+  color: #fff;
+}
+
+.topCenter {
+  top: 5rem;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+
+.topLeft {
+  top: 5rem;
+  left: 2rem;
+}
+
+.topRight {
+  top: 5rem;
+  right: 2rem;
+}
+
+.bottomCenter {
+  bottom: 5rem;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+
+.bottomLeft {
+  left: 2rem;
+  bottom: 5rem;
+}
+
+.bottomRight {
+  right: 2rem;
+  bottom: 5rem;
+}
+
+//
+
+.enter {
+  opacity: 0.01;
+  transform: translateY(-50%);
+}
+.enter.enterActive {
+  opacity: 1;
+  transform: translateY(0);
+}
+.leave {
+  opacity: 1;
+  transform: translateY(0);
+}
+.leave.leaveActive {
+  opacity: 0.01;
+  transform: translateY(-50%);
+}
+.appear {
+  transform: translateY(-50%);
+}
+.appear.appearActive {
+  opacity: 1;
+  transform: translateY(0);
+}
