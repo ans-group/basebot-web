@@ -47,7 +47,7 @@ class SocketClient {
   on = (event, cb) => {
     if (this.handlers[event]) {
       this.handlers[event].push(cb)
-      if (event !== 'reconnect'){
+      if (event !== 'reconnect') {
         this.connection.addEventListener(event, cb)
       }
     }
@@ -56,13 +56,13 @@ class SocketClient {
   off = (event, cb) => {
     if (this.handlers[event] && this.handlers[event].includes(cb)) {
       this.handlers[event].splice(this.handlers[event].indexOf(cb), 1)
-      if (event !== 'reconnect'){
+      if (event !== 'reconnect') {
         this.connection.removeEventListener(event, cb)
       }
     }
   }
 
-  onAsync = (event) => new Promise((resolve) => { this.on(event, resolve) }) 
+  onAsync = (event) => new Promise((resolve) => { this.on(event, resolve) })
 
   reconnect = () => {
     console.info('attempting reconnect...')
@@ -78,24 +78,31 @@ class SocketClient {
     }, 2500)
   }
 }
-
 const baseURLs = {
-  production: document.currentScript 
-    ? (document.currentScript && (
-      document.currentScript.getAttribute('data-basebotendpoint')
-      || (document.currentScript.getAttribute('src') && new URL(document.currentScript.getAttribute('src')).host)
-    ))
-    : window.location.host,
-  development: 'localhost:3000'
-}
-
-const protocol = document.currentScript 
+  production: document.currentScript
     ? (
       document.currentScript
-      && document.currentScript.getAttribute('src') 
-      && new URL(document.currentScript.getAttribute('src')).protocol
+      && (
+        document.currentScript.getAttribute('data-basebotendpoint')
+        || (
+          document.currentScript.getAttribute('src')
+          && isURL(document.currentScript.getAttribute('src'))
+          && new URL(document.currentScript.getAttribute('src')).host
+        )
+      )
     )
-    : window.location.protocol
+    : window.location.host,
+  development: 'localhost:3001'
+}
+
+const protocol = document.currentScript
+  ? (
+    document.currentScript
+    && document.currentScript.getAttribute('src')
+    && isURL(document.currentScript.getAttribute('src'))
+    && new URL(document.currentScript.getAttribute('src')).protocol
+  )
+  : window.location.protocol
 
 
 const baseURL = `${protocol}//${getValue(baseURLs)}`
@@ -118,4 +125,17 @@ export { socketAPI, restAPI, updateToken }
 
 function getValue(from) {
   return from[process.env.NODE_ENV] || from.development
+}
+
+
+
+function isURL(str) {
+  if (str === 'main.js') return false
+  var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+    '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+  return pattern.test(str);
 }
