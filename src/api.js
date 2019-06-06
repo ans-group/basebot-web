@@ -9,35 +9,58 @@ function generateGuid() {
 
 class SocketClient {
   constructor(baseURL) {
+    if (this.instance) return this.instance
+    this.instance = this
     this.baseURL = baseURL
-    this.guid = localStorage.getItem('basebotGuid') || generateGuid()
+    this.token = localStorage.getItem('currentUser')
     this.connected = false
+    this.connectInvoked = false
+    this.heartbeatInterval = 30000
 
     this.handlers = {
-      message: [],
+      message: [({ data }) => {
+        const { event } = JSON.parse(data)
+        if (event === 'pong') {
+          setTimeout(this.heartbeat, this.heartbeatInterval)
+        }
+      }],
       reconnect: [],
       close: [() => {
         this.connected = false
+        clearTimeout(this.pingTimeout)
       }],
       error: [(err) => {
+        /* eslint-disable-next-line */
         console.error(err)
         this.connected = false
+        clearTimeout(this.pingTimeout)
       }],
-      open: [() => {
+      open: [(e) => {
         this.connected = true
+        this.heartbeat()
       }]
     }
   }
 
+  heartbeat = () => {
+    this.connection.send('ping')
+    clearTimeout(this.pingTimeout)
+    this.pingTimeout = setTimeout(() => {
+      console.warn('skipped a heartbeat')
+      this.connected = false
+      this.handlers.close.forEach(handler => handler())
+    }, this.heartbeatInterval + 2000)
+  }
+
   send = (data) => {
     if (this.connected) {
-      console.log('sending ', data)
-      this.connection.send(JSON.stringify(data))
+      this.connection.send(data)
     }
   }
 
   connect = () => {
-    this.connection = new WebSocket(this.baseURL)
+    this.connectInvoked = true
+    this.connection = new WebSocket(this.baseURL, this.token)
     this.handlers.close.forEach(handler => this.connection.addEventListener('close', handler))
     this.handlers.error.forEach(handler => this.connection.addEventListener('error', handler))
     this.handlers.message.forEach(handler => this.connection.addEventListener('message', handler))
@@ -47,7 +70,7 @@ class SocketClient {
   on = (event, cb) => {
     if (this.handlers[event]) {
       this.handlers[event].push(cb)
-      if (event !== 'reconnect') {
+      if (event !== 'reconnect' && this.connection) {
         this.connection.addEventListener(event, cb)
       }
     }
@@ -72,12 +95,13 @@ class SocketClient {
       if (!this.connected) {
         this.reconnect()
       } else {
-        console.info('reconnected')
+        this.heartbeat()
         this.handlers.reconnect.forEach(handler => handler())
       }
-    }, 2500)
+    }, 4000)
   }
 }
+
 const baseURLs = {
   production: document.currentScript
     ? (
@@ -92,7 +116,7 @@ const baseURLs = {
       )
     )
     : window.location.host,
-  development: 'localhost:3001'
+  development: 'localhost:3000'
 }
 
 const protocol = document.currentScript

@@ -15,14 +15,23 @@ import toastsReducer from './ducks/toasts'
 // Redux/Saga
 const sagaMiddleware = createSagaMiddleware()
 
-function * rootSaga () {
+function* rootSaga() {
   yield all([
     messagesSaga()
   ])
 }
 
+const gdm = getDefaultMiddleware()
+const defaultMiddleware = Array.isArray(gdm)
+  ? gdm
+  : (
+    gdm
+      ? [gdm]
+      : []
+  )
+
 const middleware = [
-  ...getDefaultMiddleware(),
+  ...defaultMiddleware,
   sagaMiddleware
 ]
 if (process.env.NODE_ENV !== 'production') {
@@ -33,7 +42,8 @@ const store = configureStore({
     toasts: toastsReducer,
     messages: messagesReducer
   },
-middleware})
+  middleware
+})
 
 sagaMiddleware.run(rootSaga)
 
@@ -41,12 +51,12 @@ sagaMiddleware.run(rootSaga)
 
 const mapDispatchToProps = dispatch => {
   return {
-    restoreSession: ({ id, token }) => dispatch(LOGIN_RESTORED({ id, token}))
+    restoreSession: ({ id, token }) => dispatch(LOGIN_RESTORED({ id, token }))
   }
 }
 
 class App extends React.Component {
-  render () {
+  render() {
     return (
       <Provider store={store}>
         <Base>

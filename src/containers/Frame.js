@@ -86,7 +86,7 @@ const IFrame = ({ children, ...props }) => {
   const headNode = contentRef && contentRef.contentWindow.document.head
   const styles = [...document.getElementsByClassName('BasebotTag')].map(item => item.outerHTML.toString()).join('')
   return (
-    <iframe title='chat' {...props} ref={setContentRef}>
+    <iframe title='chat' {...props} ref={setContentRef} src={navigator.userAgent.includes('Firefox') ? `javascript:&nbsp;` : ``}>
       {headNode &&
         createPortal(
           <Fragment>
@@ -101,7 +101,7 @@ const IFrame = ({ children, ...props }) => {
             </style>
           </Fragment>,
           headNode
-      )}
+        )}
       {mountNode &&
         createPortal(
           React.Children.only(children),

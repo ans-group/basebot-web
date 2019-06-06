@@ -12,14 +12,14 @@ root.setAttribute('id', 'root')
 document.body.appendChild(root)
 
 class Container extends React.Component {
-  constructor(props){ 
+  constructor(props) {
     super(props)
 
     this.state = { open: false }
 
     window.addEventListener('message', (e) => {
       if (e.data === 'TOGGLE_CHAT') {
-        this.toggleChatPane() 
+        this.toggleChatPane()
       }
     }, false)
   }
@@ -49,20 +49,20 @@ class Container extends React.Component {
   render() {
     const classes = classNames(
       styles.chatPane,
-      {[styles.openChatPane]: this.state.open}
+      { [styles.openChatPane]: this.state.open }
     )
     return process.env.NODE_ENV === 'production'
-    ? (
-      <React.Fragment>
-        <Frame className={classes} style={{position: 'fixed', display: 'none'}} id="BASEBOT_CHAT_PANE">
-          <App />
-        </Frame>
-        <Frame className={styles.widgetFrame} style={{position: 'fixed', display: 'none'}}>
-          <Widget open={this.state.open} />
-        </Frame>
-      </React.Fragment>
-    )
-    : (<App />)
+      ? (
+        <React.Fragment>
+          <Frame className={classes} style={{ position: 'fixed', display: 'none' }} id='BASEBOT_CHAT_PANE'>
+            <App />
+          </Frame>
+          <Frame className={styles.widgetFrame} style={{ position: 'fixed', display: 'none' }}>
+            <Widget open={this.state.open} />
+          </Frame>
+        </React.Fragment>
+      )
+      : (<App />)
   }
 }
 
