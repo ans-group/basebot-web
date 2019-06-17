@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import classNames from 'classnames'
@@ -62,7 +63,7 @@ class Container extends React.Component {
           </Frame>
         </React.Fragment>
       )
-      : (<App />)
+      : <App />
   }
 }
 

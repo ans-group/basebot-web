@@ -4,7 +4,6 @@ import createSocketChannel from '../util/createSocketChannel'
 import { call, put, race, takeLatest, takeEvery, take, delay, cancelled, fork } from 'redux-saga/effects'
 import { socketAPI, restAPI } from '../api'
 
-window.api = socketAPI
 
 const { actions, reducer } = createSlice({
   initialState: {
@@ -26,8 +25,8 @@ const { actions, reducer } = createSlice({
         channel: 'socket'
       })
     },
-    MESSAGE_CHANNEL_START(state, { payload }) {},
-    MESSAGE_CHANNEL_STOP(state, { payload }) {},
+    MESSAGE_CHANNEL_START(state, { payload }) { },
+    MESSAGE_CHANNEL_STOP(state, { payload }) { },
     MESSAGE_CHANNEL_ONLINE(state, { payload }) {
       state.channelStatus = 'on'
     },
@@ -42,49 +41,57 @@ const { actions, reducer } = createSlice({
       state.serverStatus = 'off'
     },
     MESSAGE_LIVE_DATA_RECEIVED(state, { payload }) {
-      const item = JSON.parse(payload)
-      if (item.type === 'message') {
-        item.from = item.from || 'Basebot'
-        item.timestamp = Date.now()
-        state.items.push(item)
-        state.lastUpdated = new Date().toString()
-      }
+      payload.from = payload.from || 'Basebot'
+      payload.timestamp = Date.now()
+      state.items.push(payload)
+      state.lastUpdated = new Date().toString()
     }
   }
 })
 
-function * onSend ({payload}) {
-  yield call(socketAPI.send, {
+function* onSend({ payload }) {
+  yield call(socketAPI.send, JSON.stringify({
     type: 'message_received',
     user: socketAPI.guid,
     text: payload,
     channel: 'socket'
-  })
+  }))
 }
 
-function * onDisconnect () {
-  yield call(socketAPI.onAsync, 'close')
-  yield put(actions.MESSAGE_SERVER_OFFLINE())
-  yield put(SHOW_TOAST({status: 'error', title: 'Connection lost'}))
-  yield call(socketAPI.reconnect)
+function* onDisconnect() {
+  const disconnectChannel = yield call(createSocketChannel, socketAPI, 'close')
+  try {
+    yield takeLatest(disconnectChannel, function* () {
+      yield put(actions.MESSAGE_SERVER_OFFLINE())
+      if (!socketAPI.reconnecting) {
+        yield call(socketAPI.reconnect)
+        yield put(SHOW_TOAST({ status: 'warning', title: 'Reconnecting' }))
+      }
+    })
+  } catch (err) { }
 }
 
-function * onReconnect () {
-  yield call(socketAPI.onAsync, 'reconnect')
-  yield call(socketAPI.send, {
-    type: 'welcome_back',
-    user: socketAPI.guid,
-    channel: 'socket'
-  })
-  yield put(SHOW_TOAST({status: 'success', title: 'Reconnected'}))
-  yield put(actions.MESSAGE_SERVER_ONLINE())
+function* onReconnect() {
+  const reconnectChannel = yield call(createSocketChannel, socketAPI, 'reconnect')
+  try {
+    yield takeLatest(reconnectChannel, function* () {
+      yield call(socketAPI.send, JSON.stringify({
+        type: 'welcome_back',
+        user: socketAPI.guid,
+        channel: 'socket'
+      }))
+      yield put(actions.MESSAGE_SERVER_ONLINE())
+    })
+  } catch (err) { }
 }
 
-function * onLiveData (payload) {
-  yield put(actions.MESSAGE_LIVE_DATA_RECEIVED(payload))
+function* onLiveData(payload) {
+  if (payload && JSON.parse(payload).type === 'message') {
+    yield put(actions.MESSAGE_LIVE_DATA_RECEIVED(JSON.parse(payload)))
+  }
 }
 
-function * connectChannel () {
+function* connectChannel() {
   try {
     // enable the channel and connect
     yield put(actions.MESSAGE_CHANNEL_ONLINE())
@@ -101,33 +108,33 @@ function * connectChannel () {
     }
 
     // process data events
-    const socketChannel = yield call(createSocketChannel, socketAPI, 'message')
+    const messageChannel = yield call(createSocketChannel, socketAPI, 'message')
 
     // listen for connection events
     yield fork(onDisconnect)
     yield fork(onReconnect)
-    yield call(socketAPI.send, {
+
+    yield call(socketAPI.send, JSON.stringify({
       type: 'hello',
       user: socketAPI.guid,
       channel: 'socket'
-    })
-
-    yield takeEvery(socketChannel, onLiveData)
-  } catch (err) {} finally {
+    }))
+    yield takeEvery(messageChannel, onLiveData)
+  } catch (err) { } finally {
     if (yield cancelled()) {
       yield put(actions.MESSAGE_CHANNEL_OFFLINE())
     }
   }
 }
 
-function * startChannel () {
+function* startChannel() {
   yield race({
     task: call(connectChannel),
     cancel: take('MESSAGE_CHANNEL_STOP')
   })
 }
 
-export function * saga () {
+export function* saga() {
   yield takeLatest('MESSAGE_CHANNEL_START', startChannel)
   yield takeLatest('MESSAGE_SEND', onSend)
 }

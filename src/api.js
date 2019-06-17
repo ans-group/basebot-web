@@ -12,16 +12,15 @@ class SocketClient {
     if (this.instance) return this.instance
     this.instance = this
     this.baseURL = baseURL
-    this.token = localStorage.getItem('currentUser')
+    this.guid = localStorage.getItem('basebotGuid') || generateGuid()
     this.connected = false
     this.connectInvoked = false
-    this.heartbeatInterval = 30000
 
     this.handlers = {
       message: [({ data }) => {
         const { event } = JSON.parse(data)
         if (event === 'pong') {
-          setTimeout(this.heartbeat, this.heartbeatInterval)
+          this.heartbeat()
         }
       }],
       reconnect: [],
@@ -33,6 +32,9 @@ class SocketClient {
         /* eslint-disable-next-line */
         console.error(err)
         this.connected = false
+        if (this.connection) {
+          this.connection.close()
+        }
         clearTimeout(this.pingTimeout)
       }],
       open: [(e) => {
@@ -43,28 +45,29 @@ class SocketClient {
   }
 
   heartbeat = () => {
-    this.connection.send('ping')
     clearTimeout(this.pingTimeout)
+    clearTimeout(this.failTimeout)
     this.pingTimeout = setTimeout(() => {
-      console.warn('skipped a heartbeat')
-      this.connected = false
-      this.handlers.close.forEach(handler => handler())
-    }, this.heartbeatInterval + 2000)
+      this.send('ping')
+      this.failTimeout = setTimeout(() => {
+        console.warn(`skipped a heartbeat`)
+        this.connected = false
+        this.connection.close()
+        this.handlers.close.forEach(handler => handler())
+      }, 5000)
+    }, 5000)
   }
 
   send = (data) => {
-    if (this.connected) {
+    if (this.connected && this.connection.readyState === 1) {
       this.connection.send(data)
     }
   }
 
   connect = () => {
     this.connectInvoked = true
-    this.connection = new WebSocket(this.baseURL, this.token)
-    this.handlers.close.forEach(handler => this.connection.addEventListener('close', handler))
-    this.handlers.error.forEach(handler => this.connection.addEventListener('error', handler))
-    this.handlers.message.forEach(handler => this.connection.addEventListener('message', handler))
-    this.handlers.open.forEach(handler => this.connection.addEventListener('open', handler))
+    const connection = new WebSocket(this.baseURL)
+    this._bindListeners(connection)
   }
 
   on = (event, cb) => {
@@ -87,18 +90,48 @@ class SocketClient {
 
   onAsync = (event) => new Promise((resolve) => { this.on(event, resolve) })
 
-  reconnect = () => {
-    console.info('attempting reconnect...')
+  reconnect = (baseURL) => {
+    console.log('connection lost.. reconnecting')
+    this.baseURL = baseURL || this.baseURL
+    this.reconnecting = true
+    if (this.connection) {
+      this.connection.close()
+      this.handlers.close.forEach(handler => handler())
+    }
     this.connect()
-    this.onAsync('reconnect')
     setTimeout(() => {
-      if (!this.connected) {
-        this.reconnect()
-      } else {
-        this.heartbeat()
+      this._pollConnection()
+      if (this.connected) {
+        console.log('reconnection successful')
+        this.reconnecting = false
+        localStorage.setItem('lastBasebotEndpoint', this.baseURL)
         this.handlers.reconnect.forEach(handler => handler())
+        this.heartbeat()
+      } else {
+        console.log('reconnection unsuccsessful')
+        this.reconnect()
       }
-    }, 4000)
+    }, 5000)
+  }
+
+  _pollConnection = () => {
+    if (this.connection.readyState === 1) {
+      this.connected = true
+    }
+  }
+
+  _bindListeners = connection => {
+    this.handlers.close.forEach(handler => connection.addEventListener('close', handler))
+    this.handlers.error.forEach(handler => connection.addEventListener('error', handler))
+    this.handlers.message.forEach(handler => connection.addEventListener('message', handler))
+    this.handlers.open.forEach(handler => connection.addEventListener('open', handler))
+    if (this.connection) {
+      this.handlers.close.forEach(handler => this.connection.removeEventListener('close', handler))
+      this.handlers.error.forEach(handler => this.connection.removeEventListener('error', handler))
+      this.handlers.message.forEach(handler => this.connection.removeEventListener('message', handler))
+      this.handlers.open.forEach(handler => this.connection.removeEventListener('open', handler))
+    }
+    this.connection = connection
   }
 }
 
@@ -116,7 +149,7 @@ const baseURLs = {
       )
     )
     : window.location.host,
-  development: 'localhost:3000'
+  development: localStorage.getItem('lastBasebotEndpoint') ? localStorage.getItem('lastBasebotEndpoint').replace(/(wss:\/\/|ws:\/\/)/, '') : 'localhost:3001'
 }
 
 const protocol = document.currentScript

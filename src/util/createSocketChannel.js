@@ -1,8 +1,8 @@
 import { eventChannel } from 'redux-saga'
 
 export default (socket, resource) => eventChannel((emit) => {
-  const handler = ({data}) => {
-    emit(data)
+  const handler = (e) => {
+    emit(e ? (e.data || e) : resource)
   }
   socket.on(resource, handler)
   return () => {

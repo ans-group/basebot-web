@@ -7,9 +7,11 @@ import logger from 'redux-logger'
 
 import Base from './components/Base'
 import Messages from './containers/Messages'
+import Debug from './containers/Debug'
 import MessageInput from './containers/MessageInput'
 import Header from './components/Header'
 import messagesReducer, { saga as messagesSaga } from './ducks/messages'
+import debugReducer, { saga as debugSaga } from './ducks/debug'
 import toastsReducer from './ducks/toasts'
 
 // Redux/Saga
@@ -17,7 +19,8 @@ const sagaMiddleware = createSagaMiddleware()
 
 function* rootSaga() {
   yield all([
-    messagesSaga()
+    messagesSaga(),
+    debugSaga()
   ])
 }
 
@@ -40,7 +43,8 @@ if (process.env.NODE_ENV !== 'production') {
 const store = configureStore({
   reducer: {
     toasts: toastsReducer,
-    messages: messagesReducer
+    messages: messagesReducer,
+    debug: debugReducer
   },
   middleware
 })
@@ -59,12 +63,17 @@ class App extends React.Component {
   render() {
     return (
       <Provider store={store}>
-        <Base>
-          <Header />
-          <Messages />
-          <MessageInput />
-        </Base>
-      </Provider>
+        <div style={{
+          display: 'flex'
+        }}>
+          <Base >
+            <Header />
+            <Messages />
+            <MessageInput />
+          </Base>
+          {process.env.NODE_ENV !== 'production' && <Debug />}
+        </div >
+      </Provider >
     )
   }
 }

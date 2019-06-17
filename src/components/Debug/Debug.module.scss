@@ -1,0 +1,32 @@
+.root {
+  margin: 1rem;
+  flex: 1 1 auto;
+  padding: 1rem;
+}
+
+.status {
+  font-size: 4rem;
+  font-weight: normal;
+  line-height: 1.4;
+  strong {
+    display: block;
+    font-size: 1.4rem;
+  }
+}
+
+.input {
+  max-width: 100%;
+  width: 40rem;
+  display: flex;
+  margin-top: 1rem;
+}
+
+.messages {
+  max-width: 40rem;
+  background: #eee;
+  padding: 1rem;
+  font-size: 1.4rem;
+  margin-top: 1rem;
+  height: calc(100vh - 25rem);
+  overflow-y: auto;
+}
