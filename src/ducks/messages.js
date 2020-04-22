@@ -11,6 +11,7 @@ const { actions, reducer } = createSlice({
     lastUpdated: null,
     serverStatus: 'unknown',
     channelStatus: 'off',
+    rated: [],
     items: []
   },
   reducers: {
@@ -51,11 +52,23 @@ const { actions, reducer } = createSlice({
     },
     DISABLE_SPEECH (state, { payload }) {
       state.speechEnabled = false
+    RATE_MESSAGE (state, { payload }) {
+      state.rated.push(payload.timestamp)
+    },
     }
   }
 })
 
-function * onSend ({ payload }) {
+function * onRate ({ payload }) {
+  yield call(socketAPI.send, JSON.stringify({
+    type: 'rating_received',
+    user: socketAPI.guid,
+    value: payload.value,
+    intent: payload.intent
+  }))
+}
+
+function* onSend({ payload }) {
   yield call(socketAPI.send, JSON.stringify({
     type: 'message_received',
     user: socketAPI.guid,
@@ -147,9 +160,11 @@ function * startChannel () {
 export function * saga () {
   yield takeLatest('MESSAGE_CHANNEL_START', startChannel)
   yield takeLatest('MESSAGE_SEND', onSend)
+  yield takeEvery('RATE_MESSAGE', onRate)
 }
 
 export const { MESSAGE_CHANNEL_START, MESSAGE_SEND } = actions
+export const { MESSAGE_CHANNEL_START, MESSAGE_SEND, RATE_MESSAGE, ENABLE_SPEECH, DISABLE_SPEECH } = actions
 
 export default reducer
 

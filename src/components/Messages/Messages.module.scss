@@ -91,6 +91,59 @@
     background-color: #fff;
   }
 }
+.rating {
+  cursor: pointer;
+  display: inline-block;
+  transition: transform .2s ease-in-out;
+  transform: scale(1);
+  margin-right: 0.5rem;
+  font-size: 1.75rem;
+  position: relative;
+  &:first-child:after {
+    content: 'Useful';
+  }
+  &:last-child:after {
+    content: 'Not Useful';
+  }
+  &:after,
+  &:before {
+    position: absolute;
+    transform: translateX(-50%);
+    left: 50%;
+    transition: opacity .2s;
+    opacity: 0;
+    pointer-events: none;
+  }
+  &:before {
+    content: '';
+    border: 0.4rem solid transparent;
+    border-top-color: rgba(0,0,0,0.9);
+    bottom: calc(100% + 0.5rem);
+  }
+  &:after {
+    white-space: nowrap;
+    text-align: center;
+    bottom: calc(100% + 1.2rem);
+    background: rgba(0, 0, 0, 0.9);
+    font-size: 1rem;
+    padding: 0.2rem;
+    color: #fff;
+    border-radius: 0.2rem;
+  }
+  &:hover {
+    transform: scale(1.1);
+    &:before,
+    &:after {
+      opacity: 1;
+    }
+  }
+}
+
+.rated {
+  color: $darkGrey;
+  font-size: 1.2rem;
+}
+
 @keyframes wave {
 	0%, 60%, 100% {
 		transform: initial;

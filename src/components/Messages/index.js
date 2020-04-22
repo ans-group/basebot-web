@@ -6,6 +6,7 @@ import styles from './Messages.module.scss'
 import Message from './Message'
 import Typing from './Typing'
 import scrollTo from '../../util/scrollTo'
+import Rating from './Rating'
 import QuickReplies from './QuickReplies'
 
 const duration = 250
