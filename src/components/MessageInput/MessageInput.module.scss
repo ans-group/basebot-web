@@ -3,9 +3,13 @@
 .root {
   height: 5.5rem;
   display: flex;
+  flex-shrink: 0;
   width: 100%;
   border-top: 0.1rem solid $grey;
   padding: 0.5rem;
+  position: relative;
+  transition: background 0.2s ease-in-out;
+  background: #fff;
 }
 
 .disabled {
@@ -13,12 +17,57 @@
   cursor: not-allowed;
 }
 
+.voiceEnabled {
+  padding-left: 3.5rem;
+  &:before,
+  &:after {
+    transition: transform .2s cubic-bezier(0, 0, 0.1, 0.9), opacity .12s ease-out;
+    transition-delay: 0s, 0.1s;
+    transform: translateX(40rem);
+    opacity: 0;
+    display: block;
+    top: 0;
+    bottom: 0.2rem;
+    margin: auto 0;
+    position: absolute;
+  }
+  &:before {
+    content: '';
+    left: 3.25rem;
+    width: 0;
+    height: 0;
+    border: 0.75rem solid transparent;
+    border-right-color: rgba(0,0,0,0.85);
+    padding: 0;
+    z-index: 1;
+  }
+  &:after {
+    font-size: 1.2rem;
+    content: 'Click again to stop recording';
+    left: 4.75rem;
+    height: 1em;
+    background: rgba(0,0,0,0.85);
+    padding: 1rem 1.2rem;
+    color: #fff;
+    line-height: 1;
+    letter-spacing: 0.03em;
+  }
+}
+
+.recording:before,
+.recording:after {
+  transform: translateX(0);
+  opacity: 1;
+}
+
 .input {
   flex: 1 1 auto;
+  background: transparent !important;
   input {
     line-height: 4.5rem;
     border: 0 !important;
     outline:0;
+    transition: background 0.2s ease-in-out;
   }
 }
 
@@ -32,4 +81,34 @@
   svg {
     font-size: 1.8rem;
   }
+}
+
+.mic {
+  display: none;
+  color: $primaryColor;
+  transition: all .2s;
+  position: absolute;
+  left: 1rem;
+  top: 0;
+  bottom: 0.4rem;
+  margin: auto 0;
+  cursor: pointer;
+  font-size: 1.7rem;
+  &:hover {
+    color: darken($primaryColor, 5%);
+  }
+}
+
+.disabled .mic {
+  color: $darkGrey;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.recording .mic {
+  color: $errorRed;
+}
+
+.voiceEnabled .mic {
+  display: block;
 }

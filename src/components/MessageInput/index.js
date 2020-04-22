@@ -1,11 +1,16 @@
 import React, { useState } from 'react'
 import propTypes from 'prop-types'
+import getUserMedia from 'get-user-media-promise'
 import classNames from 'classnames'
 import styles from './MessageInput.module.scss'
+import RecordButton from './RecordButton'
 import Input from '../Input'
 import Button from '../Button'
+import { awsEnabled } from '../../aws.config'
 
-const MessageInput = ({ sendMessage, connected }) => {
+const VoiceSupport = window.webkitSpeechRecognition || window.SpeechRecognition || getUserMedia.isSupported
+
+const MessageInput = ({ sendMessage, connected, recording, toggleRecording }) => {
   const [text, setText] = useState('')
 
   const handleSend = e => {
@@ -24,11 +29,17 @@ const MessageInput = ({ sendMessage, connected }) => {
 
   const classes = classNames(
     styles.root,
-    {[styles.disabled]: !connected}
+    { [styles.disabled]: !connected },
+    { [styles.recording]: recording },
+    { [styles.voiceEnabled]: !!VoiceSupport }
   )
 
   return (
     <div className={classes}>
+      <RecordButton
+        recording={recording}
+        toggleRecording={toggleRecording}
+      />
       <Input
         type='text'
         value={text}
@@ -48,7 +59,9 @@ const MessageInput = ({ sendMessage, connected }) => {
 
 MessageInput.propTypes = {
   sendMessage: propTypes.func.isRequired,
-  connected: propTypes.bool
+  connected: propTypes.bool,
+  recording: propTypes.bool,
+  toggleRecording: propTypes.func
 }
 
 export default MessageInput

@@ -13,14 +13,16 @@ import MessageInput from './containers/MessageInput'
 import Header from './components/Header'
 import messagesReducer, { saga as messagesSaga } from './ducks/messages'
 import debugReducer, { saga as debugSaga } from './ducks/debug'
+import audioReducer, { saga as audioSaga } from './ducks/audio'
 import toastsReducer from './ducks/toasts'
 
 // Redux/Saga
 const sagaMiddleware = createSagaMiddleware()
 
-function* rootSaga() {
+function * rootSaga () {
   yield all([
     messagesSaga(),
+    audioSaga(),
     debugSaga()
   ])
 }
@@ -45,6 +47,7 @@ const store = configureStore({
   reducer: {
     toasts: toastsReducer,
     messages: messagesReducer,
+    audio: audioReducer,
     debug: debugReducer
   },
   middleware

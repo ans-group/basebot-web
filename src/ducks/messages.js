@@ -4,7 +4,6 @@ import createSocketChannel from '../util/createSocketChannel'
 import { call, put, race, takeLatest, takeEvery, take, delay, cancelled, fork } from 'redux-saga/effects'
 import { socketAPI, restAPI } from '../api'
 
-
 const { actions, reducer } = createSlice({
   initialState: {
     loading: false,
@@ -15,7 +14,7 @@ const { actions, reducer } = createSlice({
     items: []
   },
   reducers: {
-    MESSAGE_SEND(state, { payload }) {
+    MESSAGE_SEND (state, { payload }) {
       state.items.push({
         type: 'message_received',
         user: socketAPI.guid,
@@ -25,31 +24,38 @@ const { actions, reducer } = createSlice({
         channel: 'socket'
       })
     },
-    MESSAGE_CHANNEL_START(state, { payload }) { },
-    MESSAGE_CHANNEL_STOP(state, { payload }) { },
-    MESSAGE_CHANNEL_ONLINE(state, { payload }) {
+    MESSAGE_CHANNEL_START (state, { payload }) { },
+    MESSAGE_CHANNEL_STOP (state, { payload }) { },
+    MESSAGE_CHANNEL_ONLINE (state, { payload }) {
       state.channelStatus = 'on'
     },
-    MESSAGE_CHANNEL_OFFLINE(state, { payload }) {
+    MESSAGE_CHANNEL_OFFLINE (state, { payload }) {
       state.channelStatus = 'off'
       state.serverStatus = 'unknown'
     },
-    MESSAGE_SERVER_ONLINE(state, { payload }) {
+    MESSAGE_SERVER_ONLINE (state, { payload }) {
       state.serverStatus = 'on'
     },
-    MESSAGE_SERVER_OFFLINE(state, { payload }) {
+    MESSAGE_SERVER_OFFLINE (state, { payload }) {
       state.serverStatus = 'off'
     },
-    MESSAGE_LIVE_DATA_RECEIVED(state, { payload }) {
+    MESSAGE_LIVE_DATA_RECEIVED (state, { payload }) {
       payload.from = payload.from || 'Basebot'
       payload.timestamp = Date.now()
       state.items.push(payload)
       state.lastUpdated = new Date().toString()
+      state.rated.push(payload.timestamp)
+    },
+    ENABLE_SPEECH (state, { payload }) {
+      state.speechEnabled = true
+    },
+    DISABLE_SPEECH (state, { payload }) {
+      state.speechEnabled = false
     }
   }
 })
 
-function* onSend({ payload }) {
+function * onSend ({ payload }) {
   yield call(socketAPI.send, JSON.stringify({
     type: 'message_received',
     user: socketAPI.guid,
@@ -58,10 +64,10 @@ function* onSend({ payload }) {
   }))
 }
 
-function* onDisconnect() {
+function * onDisconnect () {
   const disconnectChannel = yield call(createSocketChannel, socketAPI, 'close')
   try {
-    yield takeLatest(disconnectChannel, function* () {
+    yield takeLatest(disconnectChannel, function * () {
       yield put(actions.MESSAGE_SERVER_OFFLINE())
       if (!socketAPI.reconnecting) {
         yield call(socketAPI.reconnect)
@@ -71,10 +77,10 @@ function* onDisconnect() {
   } catch (err) { }
 }
 
-function* onReconnect() {
+function * onReconnect () {
   const reconnectChannel = yield call(createSocketChannel, socketAPI, 'reconnect')
   try {
-    yield takeLatest(reconnectChannel, function* () {
+    yield takeLatest(reconnectChannel, function * () {
       yield call(socketAPI.send, JSON.stringify({
         type: 'welcome_back',
         user: socketAPI.guid,
@@ -85,13 +91,17 @@ function* onReconnect() {
   } catch (err) { }
 }
 
-function* onLiveData(payload) {
+function * onLiveData (payload) {
   if (payload && JSON.parse(payload).type === 'message') {
+    const speechEnabled = yield select(state => state.messages.speechEnabled)
+    if (speechEnabled) {
+      yield call(say, payload)
+    }
     yield put(actions.MESSAGE_LIVE_DATA_RECEIVED(JSON.parse(payload)))
   }
 }
 
-function* connectChannel() {
+function * connectChannel () {
   try {
     // enable the channel and connect
     yield put(actions.MESSAGE_CHANNEL_ONLINE())
@@ -127,14 +137,14 @@ function* connectChannel() {
   }
 }
 
-function* startChannel() {
+function * startChannel () {
   yield race({
     task: call(connectChannel),
     cancel: take('MESSAGE_CHANNEL_STOP')
   })
 }
 
-export function* saga() {
+export function * saga () {
   yield takeLatest('MESSAGE_CHANNEL_START', startChannel)
   yield takeLatest('MESSAGE_SEND', onSend)
 }
@@ -142,3 +152,22 @@ export function* saga() {
 export const { MESSAGE_CHANNEL_START, MESSAGE_SEND } = actions
 
 export default reducer
+
+async function say (payload) {
+  var text = removeMd(JSON.parse(payload).text)
+    .replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/g, 'Check out the link in the message for more info.')
+  if (SpeechSynthesisUtterance && speechSynthesis && speechSynthesis.speak) {
+    let i = 0
+    const textChunks = text.match(/.{250}\w*\W*|.*/g)
+    const utterances = textChunks.map(chunk => new SpeechSynthesisUtterance(chunk))
+    const onend = () => {
+      i++
+      if (utterances[i]) {
+        utterances[i].onend = onend
+        speechSynthesis.speak(utterances[i])
+      }
+    }
+    utterances[0].onend = onend
+    speechSynthesis.speak(utterances[0])
+  }
+}
