@@ -1,19 +1,21 @@
+/* global WebSocket localStorage */
 import axios from 'axios'
 import uuidv1 from 'uuid/v1'
 import ReactGA from 'react-ga'
 
-function generateGuid() {
+function generateGuid () {
   const id = uuidv1()
   localStorage.setItem('basebotGuid', id)
   return id
 }
 
 class SocketClient {
-  constructor(baseURL) {
+  constructor (baseURL) {
     if (this.instance) return this.instance
     this.instance = this
     this.baseURL = baseURL
     this.guid = localStorage.getItem('basebotGuid') || generateGuid()
+    ReactGA.set({ userId: this.guid })
     this.connected = false
     this.connectInvoked = false
 
@@ -105,14 +107,14 @@ class SocketClient {
       if (this.connected) {
         console.log('reconnection successful')
         this.reconnecting = false
-        localStorage.setItem('lastBasebotEndpoint', this.baseURL)
+        localStorage.setItem('lastBasebotEndpoint', this.baseURL.replace('\/socket', ''))
         this.handlers.reconnect.forEach(handler => handler())
         this.heartbeat()
       } else {
         console.log('reconnection unsuccsessful')
         this.reconnect()
       }
-    }, 5000)
+    }, 2000)
   }
 
   _pollConnection = () => {
@@ -139,29 +141,28 @@ class SocketClient {
 const baseURLs = {
   production: document.currentScript
     ? (
-      document.currentScript
-      && (
-        document.currentScript.getAttribute('data-basebotendpoint')
-        || (
-          document.currentScript.getAttribute('src')
-          && isURL(document.currentScript.getAttribute('src'))
-          && new URL(document.currentScript.getAttribute('src')).host
+      document.currentScript &&
+      (
+        document.currentScript.getAttribute('data-basebotendpoint') ||
+        (
+          document.currentScript.getAttribute('src') &&
+          isURL(document.currentScript.getAttribute('src')) &&
+          new URL(document.currentScript.getAttribute('src')).host
         )
       )
     )
     : window.location.host,
-  development: localStorage.getItem('lastBasebotEndpoint') ? localStorage.getItem('lastBasebotEndpoint').replace(/(wss:\/\/|ws:\/\/)/, '') : 'localhost:3001'
+  development: localStorage.getItem('lastBasebotEndpoint') ? localStorage.getItem('lastBasebotEndpoint').replace(/(wss:\/\/|ws:\/\/)/, '') : 'localhost:3000'
 }
 
 const protocol = document.currentScript
   ? (
-    document.currentScript
-    && document.currentScript.getAttribute('src')
-    && isURL(document.currentScript.getAttribute('src'))
-    && new URL(document.currentScript.getAttribute('src')).protocol
+    document.currentScript &&
+    document.currentScript.getAttribute('src') &&
+    isURL(document.currentScript.getAttribute('src')) &&
+    new URL(document.currentScript.getAttribute('src')).protocol
   )
   : window.location.protocol
-
 
 const baseURL = `${protocol}//${getValue(baseURLs)}`
 const socketURL = `${protocol === 'https:' ? 'wss:' : 'ws:'}//${getValue(baseURLs)}/socket`
@@ -180,20 +181,17 @@ const updateToken = (token) => {
 
 export { socketAPI, restAPI, updateToken }
 
-
-function getValue(from) {
+function getValue (from) {
   return from[process.env.NODE_ENV] || from.development
 }
 
-
-
-function isURL(str) {
+function isURL (str) {
   if (str === 'main.js') return false
   var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
     '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
     '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
     '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-    '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
-  return pattern.test(str);
+    '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
+  return pattern.test(str)
 }
