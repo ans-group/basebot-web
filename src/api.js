@@ -1,5 +1,6 @@
 import axios from 'axios'
 import uuidv1 from 'uuid/v1'
+import ReactGA from 'react-ga'
 
 function generateGuid() {
   const id = uuidv1()
