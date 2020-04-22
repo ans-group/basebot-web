@@ -1,14 +1,12 @@
 import React, { useState } from 'react'
 import propTypes from 'prop-types'
-import getUserMedia from 'get-user-media-promise'
 import classNames from 'classnames'
 import styles from './MessageInput.module.scss'
 import RecordButton from './RecordButton'
 import Input from '../Input'
 import Button from '../Button'
-import { awsEnabled } from '../../aws.config'
 
-const VoiceSupport = window.webkitSpeechRecognition || window.SpeechRecognition || getUserMedia.isSupported
+const VoiceSupport = window.webkitSpeechRecognition || window.SpeechRecognition
 
 const MessageInput = ({ sendMessage, connected, recording, toggleRecording }) => {
   const [text, setText] = useState('')
