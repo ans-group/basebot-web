@@ -1,4 +1,11 @@
-export default function scrollTo(element, duration) {
+/**
+ * scrollTo
+ *
+ * @param element
+ * @param duration
+ * @returns {undefined}
+ */
+export default function scrollTo (element, duration) {
   if (!element) {
     return
   }
