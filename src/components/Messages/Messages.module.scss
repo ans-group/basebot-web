@@ -65,6 +65,32 @@
   }
 }
 
+.quickReplies {
+  padding-right: 1rem;
+  margin-left: 20%;
+  text-align: right;
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  flex-flow: row wrap-reverse;
+}
+
+.quickReply {
+  white-space: nowrap;
+  display: inline-block;
+  border: 0.1rem solid $grey;
+  border-radius: 1.5rem;
+  padding: 0.7rem;
+  margin-left: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color .2s ease-in-out;
+  background: rgba(255,255,255,0.5);
+  &:hover {
+    background-color: #fff;
+  }
+}
 @keyframes wave {
 	0%, 60%, 100% {
 		transform: initial;
