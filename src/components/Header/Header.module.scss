@@ -1,24 +1,47 @@
 @import '../../styles/variables';
 
 .root {
-  background: #fafafa;
+  color: #fff;
+  background: $lightGrey;
   text-align: center;
   padding: 2rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-basis: 12rem;
+  flex-shrink: 0;
+
+  @media (max-height: 500px) {
+    flex-basis: 4rem;
+    padding: 0.5rem;
+  }
 }
 
 .image {
-  width: 5rem;
+  max-width: 6rem;
+  margin: 0 auto 1rem;
+
+  @media (max-height: 500px) {
+    display: none;
+  }
 }
 
 .heading {
   font-size: 1.7rem;
   font-weight: 500;
+  color: #1e1e1e;
 }
 
 .base {
-  color: darken($grey, 15%);
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: $primaryColor;
+  display: inline-block;
+  margin-right: 0.5rem;
 }
 
 .bot {
-  color: $primaryColor;
+  font-size: 2.1rem;
 }

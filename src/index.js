@@ -2,18 +2,20 @@ import '@babel/polyfill'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import classNames from 'classnames'
-
 import Frame from './containers/Frame'
 import App from './App'
 import Widget from './Widget'
 import styles from './styles/Frame.module.scss'
+
+// URL shim
+window.URL = window.URL || window.webkitURL
 
 const root = document.createElement('div')
 root.setAttribute('id', 'root')
 document.body.appendChild(root)
 
 class Container extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = { open: false }
@@ -47,18 +49,22 @@ class Container extends React.Component {
     document.removeEventListener('click', this.hideChatPane)
   }
 
-  render() {
-    const classes = classNames(
+  render () {
+    const chatPaneClasses = classNames(
       styles.chatPane,
       { [styles.openChatPane]: this.state.open }
+    )
+    const toggleFrameClasses = classNames(
+      styles.widgetFrame,
+      { [styles.activeWidgetFrame]: this.state.open }
     )
     return process.env.NODE_ENV === 'production'
       ? (
         <React.Fragment>
-          <Frame className={classes} style={{ position: 'fixed', display: 'none' }} id='BASEBOT_CHAT_PANE'>
+          <Frame className={chatPaneClasses} style={{ position: 'fixed', display: 'none' }} id='BASEBOT_CHAT_PANE'>
             <App />
           </Frame>
-          <Frame className={styles.widgetFrame} style={{ position: 'fixed', display: 'none' }}>
+          <Frame className={toggleFrameClasses} style={{ position: 'fixed', display: 'none' }}>
             <Widget open={this.state.open} />
           </Frame>
         </React.Fragment>

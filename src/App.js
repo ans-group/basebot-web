@@ -64,11 +64,11 @@ const mapDispatchToProps = dispatch => {
 }
 
 class App extends React.Component {
-  render() {
+  render () {
     return (
       <Provider store={store}>
         <div style={{
-          display: 'flex'
+          display: window.innerWidth > 420 ? 'flex' : 'block'
         }}>
           <Base >
             <Header />

@@ -10,7 +10,7 @@ const rootStyles = `
 
 html {
   font-size: 62.5%;
-  font-family: 'Work Sans', sans-serif;
+  font-family: "Roboto",Arial,"Helvetica Neue",Helvetica,sans-serif;
   background: transparent;
 }
 
@@ -20,7 +20,8 @@ body {
   overflow: hidden;
 }
 body * {
-    font-family: 'Work Sans', sans-serif;
+    font-family: "Roboto",Arial,"Helvetica Neue",Helvetica,sans-serif;
+    font-weight: 300;
     font-size: 1.4rem;
     box-sizing: border-box;
   }
@@ -93,7 +94,7 @@ const IFrame = ({ children, ...props }) => {
             <meta charSet='utf-8' />
             <meta name='viewport' content='width=device-width,minimum-scale=1.0,maximum-scale=1.0,initial-scale=1.0' />
             <meta name='MobileOptimized' content='320' />
-            <link href='https://fonts.googleapis.com/css?family=Work+Sans:400,500,700' rel='stylesheet' />
+            <link href='https://fonts.googleapis.com/css?family=Roboto:300,500,900&display=swap' rel='stylesheet' />
             <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css' rel='stylesheet' />
             {ReactHtmlParser(styles)}
             <style>

@@ -4,7 +4,7 @@ import styles from './Debug.module.scss'
 
 const Debug = ({ endpoint, updateEndpoint, online, messages }) => {
   const handleBlur = e => {
-    const url = e && e.target && e.target.value && e.target.value.replace(/(http:\/\/|https:\/\/)/, '')
+    const url = e && e.target && e.target.value && e.target.value.replace(/(http:\/\/|https:\/\/)/, '') + '/socket'
     if (!url) return
     updateEndpoint(url)
   }

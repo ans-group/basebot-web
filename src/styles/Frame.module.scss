@@ -19,18 +19,18 @@
 .widget {
   outline: 0 !important;
   box-sizing: border-box;
-  background: #fff;
-  border-radius: 50%;
   padding: 1.5rem;
   width: 6rem;
   height: 6rem;
   margin: auto;
-  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.15);
   transition: all .2s ease-in-out;
   transform: rotate(0deg);
   position: absolute;
   top:0; left: 0; right: 0; bottom: 0;
   cursor: pointer;
+  border-radius: 50%;
+  background: #1e1e1e;
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.15);
   &:hover {
     transform: rotate(0deg) scale(1.05);
     box-shadow: 0 0.3rem 1.2rem rgba(0, 0, 0, 0.1);
@@ -41,7 +41,8 @@
     height: 3rem;
     width: 3rem;
     transform: translateY(-0.2rem) scale(1);
-    stroke: #1e1e1e;
+    stroke: #fff;
+    fill: #fff;
   }
   .cross{
     opacity: 0;
@@ -54,8 +55,31 @@
     width: 2rem;
     height: 2rem;
     transform: scale(0);
+    stroke: #fff;
+    fill: #fff;
+    path {
+      fill: #fff;
+    }
   }
 }
+
+.widget.widgetMobile {
+  box-shadow: none;
+  &:hover {
+    box-shadow: none;
+  }
+}
+
+.activeWidgetFrame {
+    @media (max-width: 619px){
+      bottom: auto;
+      top: 0;
+      right: 0;
+    }
+    @media all and (max-width: 619px) and (max-height: 500px) {
+      top: -2rem;
+    }
+  }
 
 .activeWidget {
   transform: rotate(180deg);
@@ -72,23 +96,43 @@
   }
 }
 
+.activeWidget.widgetMobile {
+  background: transparent;
+  border-radius: 0;
+  .cross {
+    stroke: #fff;
+    path {
+      fill: #fff;
+    }
+  }
+}
+
 .chatPane {
   @extend .widgetFrame;
   transition: all .3s ease-in-out;
-  width: calc(100% - 20px);
-  max-width: 330px;
-  bottom: 100px;
   position: fixed;
   border: 0;
   height: 0;
-  max-height: 600px;
-  height: 0;
   opacity: 0;
+  bottom: 0;
+  right: 0;
+  width: 100vw;
+  max-width: none;
+  @media (min-width: 620px) {
+    right: 20px;
+    max-height: 600px;
+    bottom: 100px;
+    width: calc(100% - 20px);
+    max-width: 420px;
+  }
 }
 
 .openChatPane {
-  height: calc(100vh - 12rem);
   opacity: 1;
+  height: 100%;
+  @media (min-width: 620px) {
+    height: calc(100vh - 12rem);
+  }
 }
 
 @keyframes show {

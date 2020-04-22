@@ -9,7 +9,8 @@ const Widget = ({open}) => {
   }
   const classes = classNames(
     styles.widget,
-    {[styles.activeWidget]: open}
+    { [styles.activeWidget]: open },
+    { [styles.widgetMobile]: window.innerWidth <= 620 }
   )
 
   return (
