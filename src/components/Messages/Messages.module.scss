@@ -7,27 +7,47 @@
 }
 
 .container {
-  padding: 2rem 1.5rem;
+  padding: 2rem 1.5rem 0;
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   overflow-y: auto;
   margin-bottom: 2rem;
+  position: relative;
 }
 
 .message {
-  border: 0.1rem solid $grey;
   padding: 1rem;
   border-radius: .85rem;
+  background: $grey;
   width: auto;
   margin-bottom: 1rem;
   font-size: 1.2rem;
   margin-right: auto;
+  box-shadow: 0 2px 4px 0 rgba(241,241,241,0.5);
+  max-width: 80%;
   h1,h2,h3,h4,h5,h6 {
     font-size: 1.4rem;
   }
-  p {
+  p, li {
     font-size: 1.2rem;
+    margin-bottom: 1em;
+  }
+  ol, ul {
+    padding-left: 2em;
+  }
+  a {
+    white-space: nowrap;
+    font-size: 0.975em;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-decoration: underline;
+    color: blue;
+    line-height: 1;
+    transform: translateY(2px);
+
   }
   *:last-child {
     margin-bottom: 0;
@@ -91,6 +111,7 @@
     background-color: #fff;
   }
 }
+
 .rating {
   cursor: pointer;
   display: inline-block;
