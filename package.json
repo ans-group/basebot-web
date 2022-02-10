@@ -37,7 +37,7 @@
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^4.2.0",
     "mini-css-extract-plugin": "^0.6.0",
-    "node-sass": "^4.13.1",
+    "node-sass": "^7.0.0",
     "prop-types": "^15.7.2",
     "react-transition-group": "^4.0.1",
     "recorder-js": "^1.0.7",
